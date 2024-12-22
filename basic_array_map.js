@@ -252,10 +252,115 @@ console.log('Expected: ["act", "abt", "art"]');
 console.log('Actual:', sortedLettersOf(["cat", "bat", "rat"]));
 
 // wrap strings in brackets ["apple", "banana"] => ["[apple]", "[banana]"]
-console.log = originalLog;
 const wrappedStringsOf = function (strings) {
   return strings.map(function (string) { return '[' + string + ']'; });
 };
 console.log('Expected: ["[apple]", "[banana]"]');
 console.log('Actual:', wrappedStringsOf(["apple", "banana"]));
+
+// normalize strings by the longest string length in ["cat", "elephant", "dog"] => ["cat    ", "elephant", "dog    "]
+// (pad with spaces to match the longest length)
+const getLongestString = function (longestString, string) {
+  if (string.length > longestString.length) {
+    longestString = string;
+  }
+
+  return longestString;
+};
+const findLongestString = function (strings) {
+  return strings.reduce(getLongestString, '');
+};
+const padString = function (longestString) {
+  return function (string) {
+    return string.padEnd(longestString.length);
+  };
+};
+const normalizeStringLengths = function (strings) {
+  return strings.map(padString(findLongestString(strings)));
+};
+console.log('Expected: ["cat     ", "elephant", "dog     "]');
+console.log('Actual:', normalizeStringLengths(["cat", "elephant", "dog"]));
+
+// normalize strings by centering them based on the longest string length in ["cat", "elephant", "dog"] => ["  cat   ", "elephant", "  dog   "]
+// (pad with spaces to justify to the center)
+const centerJustifyString = function (longestString) {
+  return function (string) {
+    const stringFirstHalf = string.slice(0, string.length / 2);
+    const stringSecondHalf = string.slice(string.length / 2, string.length);
+
+    const paddedAtStart = stringFirstHalf.padStart(longestString.length / 2);
+    const paddedAtEnd = stringSecondHalf.padEnd(longestString.length / 2);
+
+    return paddedAtStart + paddedAtEnd;
+  };
+};
+const centerJustifyStrings = function (strings) {
+  return strings.map(centerJustifyString(findLongestString(strings)));
+};
+console.log('Expected: ["  cat   ", "elephant", "  dog   "]');
+console.log('Actual:', centerJustifyStrings(["cat", "elephant", "dog"]));
+
+// scale all numbers proportionally so the largest number becomes 100 in [20, 50, 80] => [25, 62.5, 100]
+const scaleNumber = function (biggestNumber) {
+  const multiplier = 100 / biggestNumber;
+  return function (number) {
+    return number * multiplier;
+  };
+};
+const scaleToMax100 = function (numbers) {
+  return numbers.map(scaleNumber(Math.max(...numbers)));
+};
+console.log('Expected: [25, 62.5, 100]');
+console.log('Actual:', scaleToMax100([20, 50, 80]));
+
+// map each number to the difference between it and the average of the array in [10, 20, 30] => [-10, 0, 10]
+const sum = function (sum, number) {
+  return sum + number;
+};
+const getMeanDifference = function (mean) {
+  return function (number) {
+    return number - mean;
+  };
+};
+const differencesFromMean = function (numbers) {
+  const mean = numbers.reduce(sum, 0) / numbers.length;
+  return numbers.map(getMeanDifference(mean));
+};
+console.log('Expected: [-10, 0, 10]');
+console.log('Actual:', differencesFromMean([10, 20, 30]));
+
+// map each string to its frequency in ["apple", "banana", "apple", "apple", "banana"] => [3, 2, 3, 3, 2]
+const countOccurences = function (key, array) {
+  let occurences = 0;
+  for (const element of array) {
+    if (element === key) {
+      occurences += 1;
+    }
+  }
+
+  return occurences;
+};
+const getFrequency = function (strings) {
+  return function (string) {
+    return countOccurences(string, strings);
+  };
+};
+const stringFrequencies = function (strings) {
+  return strings.map(getFrequency(strings));
+};
+console.log('Expected: [3, 2, 3, 3, 2]');
+console.log('Actual:', stringFrequencies(["apple", "banana", "apple", "apple", "banana"]));
+
+console.log = originalLog;
+// mark the largest number in an array as true, others as false in [1, 3, 2] => [false, true, false]
+const isLargestNumber = function (largestNumber) {
+  return function (number) {
+    return number === largestNumber;
+  };
+};
+const markLargestNumber = function (numbers) {
+  return numbers.map(isLargestNumber(Math.max(...numbers)));
+};
+console.log('Expected: [false, true, false]');
+console.log('Actual:', markLargestNumber([1, 3, 2]));
 console.log = function () { };
